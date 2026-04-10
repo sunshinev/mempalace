@@ -6,6 +6,8 @@
 
 ### The highest-scoring AI memory system ever benchmarked. And it's free.
 
+**English | [中文](README_CN.md)**
+
 <br>
 
 Every conversation you have with an AI — every decision, every debugging session, every architecture debate — disappears when the session ends. Six months of work, gone. You start over every time.
