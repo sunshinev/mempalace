@@ -137,23 +137,18 @@ pip install mempalace
 uv tool install mempalace
 ```
 
-**Step 2: Configure MCP**
+**Step 2: Add MCP Server**
 
-Edit `~/.config/opencode/opencode.json` (create it if it doesn't exist):
-
-```json
-{
-  "mcp": {
-    "mempalace": {
-      "command": ["python3", "-m", "mempalace.mcp_server"],
-      "enabled": true,
-      "type": "local"
-    }
-  }
-}
+```bash
+opencode mcp add
 ```
 
-> **If installed via `uv tool install`** — use the uv Python path instead:
+This interactive command will guide you through the setup. When prompted:
+- **Type**: select `local`
+- **Name**: enter `mempalace`
+- **Command**: enter `python3 -m mempalace.mcp_server`
+
+> **If installed via `uv tool install`**, use the full Python path for the command:
 >
 > ```bash
 > # Find the path
@@ -161,17 +156,7 @@ Edit `~/.config/opencode/opencode.json` (create it if it doesn't exist):
 > # e.g. /Users/you/.local/share/uv/tools
 > ```
 >
-> ```json
-> {
->   "mcp": {
->     "mempalace": {
->       "command": ["/Users/you/.local/share/uv/tools/mempalace/bin/python", "-m", "mempalace.mcp_server"],
->       "enabled": true,
->       "type": "local"
->     }
->   }
-> }
-> ```
+> Then use: `/Users/you/.local/share/uv/tools/mempalace/bin/python -m mempalace.mcp_server`
 
 **Step 3: Verify**
 

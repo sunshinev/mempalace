@@ -137,23 +137,18 @@ pip install mempalace
 uv tool install mempalace
 ```
 
-**第 2 步：配置 MCP**
+**第 2 步：添加 MCP 服务器**
 
-编辑 `~/.config/opencode/opencode.json`（不存在则新建）：
-
-```json
-{
-  "mcp": {
-    "mempalace": {
-      "command": ["python3", "-m", "mempalace.mcp_server"],
-      "enabled": true,
-      "type": "local"
-    }
-  }
-}
+```bash
+opencode mcp add
 ```
 
-> **如果是通过 `uv tool install` 安装的**，需要指向 uv 环境中的 python：
+这个交互式命令会引导你完成配置。按提示选择：
+- **Type**：选择 `local`
+- **Name**：输入 `mempalace`
+- **Command**：输入 `python3 -m mempalace.mcp_server`
+
+> **如果是通过 `uv tool install` 安装的**，Command 需要使用完整的 Python 路径：
 >
 > ```bash
 > # 查找路径
@@ -161,17 +156,7 @@ uv tool install mempalace
 > # 例如 /Users/you/.local/share/uv/tools
 > ```
 >
-> ```json
-> {
->   "mcp": {
->     "mempalace": {
->       "command": ["/Users/you/.local/share/uv/tools/mempalace/bin/python", "-m", "mempalace.mcp_server"],
->       "enabled": true,
->       "type": "local"
->     }
->   }
-> }
-> ```
+> 然后输入：`/Users/you/.local/share/uv/tools/mempalace/bin/python -m mempalace.mcp_server`
 
 **第 3 步：验证**
 
