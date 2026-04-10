@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Knowledge Graph{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2 data-i18n="kg.title">Knowledge Graph</h2>
+    <div class="controls">
+        <input type="text" id="entity-search" data-i18n="kg.search_entity" placeholder="Search entity..." class="search-input">
+        <button id="kg-load-btn" class="btn btn-primary" data-i18n="kg.load">Load</button>
+        <button id="kg-load-all-btn" class="btn" style="background:var(--accent);color:white;" data-i18n="kg.load_all">Load All</button>
+    </div>
+</div>
+<div class="graph-wrapper">
+    <div id="kg-graph" class="graph-container"></div>
+    <div id="kg-detail-panel" class="detail-panel"></div>
+</div>
+
+<!-- Add Fact Form -->
+<div style="margin-top:20px;" class="card">
+    <h3 style="margin-bottom:12px;color:var(--text-bright);" data-i18n="kg.add_fact">Add Fact</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;">
+        <div>
+            <label class="text-muted" style="font-size:12px;" data-i18n="kg.subject">Subject</label>
+            <input type="text" id="kg-subject" class="search-input" data-i18n="kg.subject" placeholder="Subject">
+        </div>
+        <div>
+            <label class="text-muted" style="font-size:12px;" data-i18n="kg.predicate">Predicate</label>
+            <input type="text" id="kg-predicate" class="search-input" data-i18n="kg.predicate" placeholder="Predicate">
+        </div>
+        <div>
+            <label class="text-muted" style="font-size:12px;" data-i18n="kg.object">Object</label>
+            <input type="text" id="kg-object" class="search-input" data-i18n="kg.object" placeholder="Object">
+        </div>
+        <div>
+            <label class="text-muted" style="font-size:12px;" data-i18n="kg.valid_from">Valid From</label>
+            <input type="date" id="kg-valid-from" class="search-input">
+        </div>
+        <button id="kg-add-btn" class="btn btn-primary" data-i18n="kg.add_fact">Add Fact</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="/static/js/kg.js"></script>
+<script>
+    const kgView = new KnowledgeGraphView('kg-graph', 'kg-detail-panel');
+
+    // Load all by default
+    kgView.load();
+
+    document.getElementById('kg-load-btn').addEventListener('click', () => {
+        const entity = document.getElementById('entity-search').value.trim();
+        if (entity) kgView.load(entity);
+    });
+
+    document.getElementById('entity-search').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const entity = e.target.value.trim();
+            if (entity) kgView.load(entity);
+        }
+    });
+
+    document.getElementById('kg-load-all-btn').addEventListener('click', () => {
+        document.getElementById('entity-search').value = '';
+        kgView.load();
+    });
+
+    // Add fact
+    document.getElementById('kg-add-btn').addEventListener('click', async () => {
+        const subject = document.getElementById('kg-subject').value.trim();
+        const predicate = document.getElementById('kg-predicate').value.trim();
+        const object = document.getElementById('kg-object').value.trim();
+        const validFrom = document.getElementById('kg-valid-from').value || undefined;
+
+        if (!subject || !predicate || !object) {
+            showNotification(t('kg.fact_required'), 'error');
+            return;
+        }
+
+        try {
+            await API.post('/api/kg/add', { subject, predicate, object, valid_from: validFrom });
+            showNotification(t('kg.fact_added'), 'success');
+            document.getElementById('kg-subject').value = '';
+            document.getElementById('kg-predicate').value = '';
+            document.getElementById('kg-object').value = '';
+            document.getElementById('kg-valid-from').value = '';
+            // Reload graph
+            kgView.load();
+        } catch (e) {
+            showNotification(t('kg.fact_add_failed') + ': ' + e.message, 'error');
+        }
+    });
+</script>
+{% endblock %}

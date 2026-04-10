@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2 data-i18n="dashboard.title">Dashboard</h2>
+</div>
+<div id="stats-container" class="stats-grid">
+    <div class="card"><h3 data-i18n="dashboard.total_drawers">Total Drawers</h3><div class="value" id="stat-drawers">--</div></div>
+    <div class="card"><h3 data-i18n="dashboard.wings">Wings</h3><div class="value" id="stat-wings">--</div></div>
+    <div class="card"><h3 data-i18n="dashboard.rooms">Rooms</h3><div class="value" id="stat-rooms">--</div></div>
+    <div class="card"><h3 data-i18n="dashboard.kg_entities">KG Entities</h3><div class="value" id="stat-entities">--</div></div>
+    <div class="card"><h3 data-i18n="dashboard.kg_triples">KG Triples</h3><div class="value" id="stat-triples">--</div></div>
+</div>
+<div id="chart-container" class="chart-container">
+    <h3 style="color:var(--text-muted);margin-bottom:16px;" data-i18n="dashboard.wing_distribution">Wing Distribution</h3>
+    <div id="wing-chart"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+(async function() {
+    try {
+        const [status, kgStats] = await Promise.all([
+            API.get('/api/status'),
+            API.get('/api/kg/stats'),
+        ]);
+
+        document.getElementById('stat-drawers').textContent = status.total_drawers ?? '--';
+        document.getElementById('stat-wings').textContent = status.wing_count ?? '--';
+        document.getElementById('stat-rooms').textContent = status.room_count ?? '--';
+        document.getElementById('stat-entities').textContent = kgStats.entities ?? kgStats.total_entities ?? '--';
+        document.getElementById('stat-triples').textContent = kgStats.triples ?? kgStats.total_triples ?? '--';
+
+        // Wing distribution bar chart
+        const taxonomy = await API.get('/api/taxonomy');
+        const tax = taxonomy.taxonomy || taxonomy;
+        const wingData = Object.entries(tax).map(([wing, rooms], i) => ({
+            wing,
+            count: Object.values(rooms).reduce((a, b) => a + b, 0),
+            color: getWingColor(i),
+        })).sort((a, b) => b.count - a.count);
+
+        if (wingData.length === 0) {
+            document.getElementById('wing-chart').innerHTML = `<p class="text-muted">${t('dashboard.no_data')}</p>`;
+            return;
+        }
+
+        const chartW = document.getElementById('chart-container').clientWidth - 40;
+        const barH = 32;
+        const chartH = wingData.length * (barH + 8) + 20;
+        const maxCount = Math.max(...wingData.map(d => d.count));
+        const labelW = 140;
+
+        const svg = d3.select('#wing-chart')
+            .append('svg')
+            .attr('width', chartW)
+            .attr('height', chartH);
+
+        const g = svg.selectAll('.bar-group')
+            .data(wingData)
+            .enter().append('g')
+            .attr('transform', (d, i) => `translate(0, ${i * (barH + 8)})`);
+
+        g.append('text')
+            .attr('x', labelW - 10)
+            .attr('y', barH / 2 + 5)
+            .attr('text-anchor', 'end')
+            .attr('fill', '#ccc')
+            .attr('font-size', '13px')
+            .text(d => d.wing);
+
+        g.append('rect')
+            .attr('x', labelW)
+            .attr('y', 0)
+            .attr('width', 0)
+            .attr('height', barH)
+            .attr('rx', 4)
+            .attr('fill', d => d.color)
+            .attr('opacity', 0.85)
+            .transition().duration(600)
+            .attr('width', d => Math.max(4, (d.count / maxCount) * (chartW - labelW - 60)));
+
+        g.append('text')
+            .attr('x', d => labelW + Math.max(4, (d.count / maxCount) * (chartW - labelW - 60)) + 8)
+            .attr('y', barH / 2 + 5)
+            .attr('fill', '#aaa')
+            .attr('font-size', '13px')
+            .text(d => d.count);
+
+    } catch (e) {
+        document.getElementById('stats-container').innerHTML = `<p class="error">${t('common.failed_load')}: ${e.message}</p>`;
+    }
+})();
+</script>
+{% endblock %}

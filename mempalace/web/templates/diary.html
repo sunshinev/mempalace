@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Diary{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2 data-i18n="diary.title">Diary</h2>
+</div>
+<div class="diary-controls">
+    <input type="text" id="agent-name" data-i18n="diary.agent_name" placeholder="Agent name..." class="search-input">
+    <select id="diary-last-n">
+        <option value="10">Last 10</option>
+        <option value="20">Last 20</option>
+        <option value="50">Last 50</option>
+    </select>
+    <button id="load-diary-btn" class="btn btn-primary" data-i18n="diary.load_btn">Load Entries</button>
+</div>
+<div id="diary-entries" class="diary-entries"></div>
+<div class="diary-writer">
+    <h3 style="color:var(--text-bright);margin-bottom:12px;" data-i18n="diary.new_entry">New Entry</h3>
+    <div style="display:flex;gap:10px;margin-bottom:10px;">
+        <input type="text" id="diary-agent-write" data-i18n="diary.agent_write" placeholder="Agent name" class="search-input" style="flex:1;">
+        <input type="text" id="diary-topic" data-i18n="diary.topic" placeholder="Topic (optional)" class="search-input" style="flex:1;">
+    </div>
+    <textarea id="diary-entry" data-i18n="diary.entry_placeholder" placeholder="Write diary entry..." class="textarea"></textarea>
+    <button id="write-diary-btn" class="btn btn-primary" data-i18n="diary.write_btn">Write Entry</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Load diary entries
+    async function loadDiary() {
+        const agent = document.getElementById('agent-name').value.trim();
+        if (!agent) { showNotification(t('diary.enter_agent'), 'error'); return; }
+        const lastN = document.getElementById('diary-last-n').value;
+        const container = document.getElementById('diary-entries');
+        container.innerHTML = `<p class="text-muted">${t('common.loading')}</p>`;
+
+        try {
+            const data = await API.get(`/api/diary/read?agent=${encodeURIComponent(agent)}&last_n=${lastN}`);
+            const entries = data.entries || [];
+
+            if (entries.length === 0) {
+                container.innerHTML = `<p class="text-muted">${t('diary.no_entries')}</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            for (const entry of entries) {
+                const card = document.createElement('div');
+                card.className = 'diary-entry-card';
+                card.innerHTML = `
+                    <div class="date">${esc(entry.timestamp || entry.date || '')}</div>
+                    ${entry.topic ? `<span class="badge" style="margin-bottom:8px;">${esc(entry.topic)}</span>` : ''}
+                    <p style="line-height:1.6;white-space:pre-wrap;">${esc(entry.entry || entry.content || '')}</p>
+                `;
+                container.appendChild(card);
+            }
+        } catch (e) {
+            container.innerHTML = `<p class="error">${t('diary.load_failed')}: ${esc(e.message)}</p>`;
+        }
+    }
+
+    document.getElementById('load-diary-btn').addEventListener('click', loadDiary);
+    document.getElementById('agent-name').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') loadDiary();
+    });
+
+    // Write diary entry
+    document.getElementById('write-diary-btn').addEventListener('click', async () => {
+        const agent = document.getElementById('diary-agent-write').value.trim();
+        const entry = document.getElementById('diary-entry').value.trim();
+        const topic = document.getElementById('diary-topic').value.trim() || 'general';
+
+        if (!agent || !entry) {
+            showNotification(t('diary.agent_required'), 'error');
+            return;
+        }
+
+        try {
+            await API.post('/api/diary/write', { agent_name: agent, entry, topic });
+            showNotification(t('diary.written'), 'success');
+            document.getElementById('diary-entry').value = '';
+            document.getElementById('diary-topic').value = '';
+            // Auto-reload if same agent
+            if (document.getElementById('agent-name').value.trim() === agent) {
+                loadDiary();
+            }
+        } catch (e) {
+            showNotification(t('diary.write_failed') + ': ' + e.message, 'error');
+        }
+    });
+</script>
+{% endblock %}

@@ -256,6 +256,41 @@ def tool_search(query: str, limit: int = 5, wing: str = None, room: str = None):
     )
 
 
+def tool_room_drawers(wing: str, room: str, limit: int = 50):
+    """List all drawers in a specific room with IDs and content."""
+    col = _get_collection()
+    if not col:
+        return _no_palace()
+    try:
+        where = {"$and": [{"wing": wing}, {"room": room}]}
+        results = col.get(
+            where=where,
+            limit=limit,
+            include=["documents", "metadatas"],
+        )
+        drawers = []
+        for i, drawer_id in enumerate(results["ids"]):
+            doc = results["documents"][i]
+            meta = results["metadatas"][i]
+            drawers.append(
+                {
+                    "id": drawer_id,
+                    "text": doc,
+                    "summary": doc[:100] + "..." if len(doc) > 100 else doc,
+                    "source_file": meta.get("source_file", ""),
+                    "filed_at": meta.get("filed_at", ""),
+                }
+            )
+        return {
+            "wing": wing,
+            "room": room,
+            "total": len(drawers),
+            "drawers": drawers,
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
 def tool_check_duplicate(content: str, threshold: float = 0.9):
     col = _get_collection()
     if not col:

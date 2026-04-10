@@ -136,11 +136,13 @@ def search_memories(
     docs = results["documents"][0]
     metas = results["metadatas"][0]
     dists = results["distances"][0]
+    ids = results["ids"][0]
 
     hits = []
-    for doc, meta, dist in zip(docs, metas, dists):
+    for doc, meta, dist, drawer_id in zip(docs, metas, dists, ids):
         hits.append(
             {
+                "id": drawer_id,
                 "text": doc,
                 "wing": meta.get("wing", "unknown"),
                 "room": meta.get("room", "unknown"),

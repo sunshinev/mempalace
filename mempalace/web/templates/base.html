@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MemPalace — {% block title %}Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h1>MemPalace</h1>
+            <button id="theme-switch" class="theme-switch" onclick="toggleTheme()">Dark / Light</button>
+            <button id="lang-switch" class="lang-switch" onclick="toggleLang()">EN / 中文</button>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/dashboard" class="{% if active == 'dashboard' %}active{% endif %}" data-i18n="nav.dashboard">Dashboard</a></li>
+            <li><a href="/palace" class="{% if active == 'palace' %}active{% endif %}" data-i18n="nav.palace">Palace</a></li>
+            <li><a href="/kg" class="{% if active == 'kg' %}active{% endif %}" data-i18n="nav.kg">Knowledge Graph</a></li>
+            <li><a href="/search" class="{% if active == 'search' %}active{% endif %}" data-i18n="nav.search">Search</a></li>
+            <li><a href="/diary" class="{% if active == 'diary' %}active{% endif %}" data-i18n="nav.diary">Diary</a></li>
+        </ul>
+    </nav>
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+    <script src="/static/js/i18n.js"></script>
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

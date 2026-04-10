@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Palace Architecture{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2 data-i18n="palace.title">Palace Architecture</h2>
+    <div class="controls">
+        <select id="wing-filter"><option value="" data-i18n="search.all_wings">All Wings</option></select>
+    </div>
+</div>
+<div class="graph-wrapper">
+    <div id="palace-graph" class="graph-container"></div>
+    <div id="detail-panel" class="detail-panel"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="/static/js/graph.js"></script>
+<script>
+    const palaceGraph = new PalaceGraph('palace-graph', 'detail-panel');
+    palaceGraph.load();
+    populateWingSelect('wing-filter');
+</script>
+{% endblock %}

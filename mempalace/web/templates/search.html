@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Search{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2 data-i18n="search.title">Search</h2>
+</div>
+<div class="search-form">
+    <input type="text" id="search-query" data-i18n="search.placeholder" placeholder="Search memories..." class="search-input search-input-lg" style="flex:1;">
+    <select id="search-wing"><option value="" data-i18n="search.all_wings">All Wings</option></select>
+    <select id="search-room"><option value="" data-i18n="search.all_rooms">All Rooms</option></select>
+    <select id="search-limit">
+        <option value="5">5 results</option>
+        <option value="10">10 results</option>
+        <option value="20">20 results</option>
+        <option value="50">50 results</option>
+    </select>
+    <button id="search-btn" class="btn btn-primary" data-i18n="search.btn">Search</button>
+</div>
+<div id="search-results" class="results-container"></div>
+
+<!-- Add Drawer Form -->
+<div style="margin-top:30px;" class="card">
+    <h3 style="margin-bottom:12px;color:var(--text-bright);" data-i18n="drawer.add_title">Add New Drawer</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:10px;">
+        <div>
+            <label class="text-muted" style="font-size:12px;" data-i18n="drawer.wing">Wing</label>
+            <input type="text" id="add-wing" class="search-input" placeholder="Wing name">
+        </div>
+        <div>
+            <label class="text-muted" style="font-size:12px;" data-i18n="drawer.room">Room</label>
+            <input type="text" id="add-room" class="search-input" placeholder="Room name">
+        </div>
+        <div>
+            <label class="text-muted" style="font-size:12px;" data-i18n="drawer.source">Source File (optional)</label>
+            <input type="text" id="add-source" class="search-input" placeholder="source.py">
+        </div>
+    </div>
+    <textarea id="add-content" class="textarea" data-i18n="drawer.content" placeholder="Drawer content..."></textarea>
+    <button id="add-drawer-btn" class="btn btn-primary" data-i18n="drawer.add_btn">Add Drawer</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Populate wing filter
+    populateWingSelect('search-wing');
+
+    // Update room options when wing changes
+    document.getElementById('search-wing').addEventListener('change', async (e) => {
+        const roomSel = document.getElementById('search-room');
+        roomSel.innerHTML = `<option value="">${t('search.all_rooms')}</option>`;
+        const wing = e.target.value;
+        if (!wing) return;
+        try {
+            const data = await API.get(`/api/rooms?wing=${encodeURIComponent(wing)}`);
+            const rooms = data.rooms || [];
+            for (const r of rooms) {
+                const opt = document.createElement('option');
+                opt.value = r.room || r;
+                opt.textContent = `${r.room || r} (${r.drawers ?? ''})`;
+                roomSel.appendChild(opt);
+            }
+        } catch (e) {
+            console.error('Failed to load rooms:', e);
+        }
+    });
+
+    // Search
+    async function doSearch() {
+        const q = document.getElementById('search-query').value.trim();
+        if (!q) { showNotification(t('search.enter_query'), 'error'); return; }
+        const wing = document.getElementById('search-wing').value;
+        const room = document.getElementById('search-room').value;
+        const limit = document.getElementById('search-limit').value;
+        const container = document.getElementById('search-results');
+        container.innerHTML = `<p class="text-muted">${t('search.searching')}</p>`;
+
+        try {
+            let url = `/api/search?q=${encodeURIComponent(q)}&limit=${limit}`;
+            if (wing) url += `&wing=${encodeURIComponent(wing)}`;
+            if (room) url += `&room=${encodeURIComponent(room)}`;
+            const data = await API.get(url);
+            const results = data.results || [];
+
+            if (results.length === 0) {
+                container.innerHTML = `<p class="text-muted">${t('search.no_results')}</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            for (const r of results) {
+                const content = r.text || '';
+                const score = r.similarity != null ? (r.similarity * 100).toFixed(1) : null;
+                const wing = r.wing || '';
+                const room = r.room || '';
+                const id = r.id || '';
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+                        <div>
+                            ${wing ? `<span class="badge">${esc(wing)}</span>` : ''}
+                            ${room ? `<span class="badge" style="background:var(--bg-secondary)">${esc(room)}</span>` : ''}
+                        </div>
+                        ${score !== null ? `<span class="score">${score}%</span>` : ''}
+                    </div>
+                    <p style="line-height:1.6;margin-bottom:8px;white-space:pre-wrap;">${esc(content)}</p>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <small class="text-muted">${esc(id)}</small>
+                        ${id ? `<button class="btn btn-danger" style="font-size:12px;padding:4px 8px;" onclick="deleteSearchResult('${esc(id)}', this)">${t('drawer.delete_btn')}</button>` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            }
+        } catch (e) {
+            container.innerHTML = `<p class="error">${t('search.failed')}: ${esc(e.message)}</p>`;
+        }
+    }
+
+    document.getElementById('search-btn').addEventListener('click', doSearch);
+    document.getElementById('search-query').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') doSearch();
+    });
+
+    // Delete from search results
+    async function deleteSearchResult(drawerId, btn) {
+        if (!confirm(t('drawer.confirm_delete'))) return;
+        try {
+            await API.del(`/api/drawer/${encodeURIComponent(drawerId)}`);
+            btn.closest('.result-card').remove();
+            showNotification(t('drawer.deleted'), 'success');
+        } catch (e) {
+            showNotification(t('drawer.delete_failed') + ': ' + e.message, 'error');
+        }
+    }
+
+    // Add drawer
+    document.getElementById('add-drawer-btn').addEventListener('click', async () => {
+        const wing = document.getElementById('add-wing').value.trim();
+        const room = document.getElementById('add-room').value.trim();
+        const content = document.getElementById('add-content').value.trim();
+        const source = document.getElementById('add-source').value.trim() || undefined;
+
+        if (!wing || !room || !content) {
+            showNotification(t('drawer.required'), 'error');
+            return;
+        }
+
+        try {
+            await API.post('/api/drawer', { wing, room, content, source_file: source });
+            showNotification(t('drawer.added'), 'success');
+            document.getElementById('add-wing').value = '';
+            document.getElementById('add-room').value = '';
+            document.getElementById('add-content').value = '';
+            document.getElementById('add-source').value = '';
+        } catch (e) {
+            showNotification(t('drawer.add_failed') + ': ' + e.message, 'error');
+        }
+    });
+</script>
+{% endblock %}
