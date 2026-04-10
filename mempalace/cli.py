@@ -249,6 +249,34 @@ def cmd_instructions(args):
     run_instructions(name=args.name)
 
 
+def cmd_web(args):
+    """Start the MemPalace Web UI server."""
+    try:
+        import uvicorn
+    except ImportError:
+        print("Web UI requires extra dependencies. Install with:")
+        print("  pip install mempalace[web]")
+        print("\nWeb UI 需要额外依赖。安装方式:")
+        print("  pip install mempalace[web]")
+        sys.exit(1)
+
+    from .web import create_app
+
+    palace_path = os.path.expanduser(args.palace) if args.palace else None
+    app = create_app(palace_path=palace_path)
+
+    port = args.port
+    print(f"\n  MemPalace Web UI starting on http://127.0.0.1:{port}")
+    print(f"  MemPalace Web UI 启动于 http://127.0.0.1:{port}")
+    print("  Press Ctrl+C to stop / 按 Ctrl+C 停止\n")
+
+    import webbrowser
+
+    webbrowser.open(f"http://127.0.0.1:{port}")
+
+    uvicorn.run(app, host="127.0.0.1", port=port, log_level="warning")
+
+
 def cmd_mcp(args):
     """Show how to wire MemPalace into MCP-capable hosts."""
     base_server_cmd = "python -m mempalace.mcp_server"
@@ -572,6 +600,23 @@ def main():
         help="Show MCP setup command for connecting MemPalace to your AI client / 显示将 MemPalace 连接到 AI 客户端的 MCP 设置命令",
     )
 
+    # web
+    p_web = sub.add_parser(
+        "web",
+        help="Start the Web UI for visualizing and managing your palace / 启动 Web UI 可视化管理宫殿",
+    )
+    p_web.add_argument(
+        "--port",
+        type=int,
+        default=8765,
+        help="Port to listen on (default: 8765) / 监听端口（默认: 8765）",
+    )
+    p_web.add_argument(
+        "--palace",
+        metavar="PATH",
+        help="Path to the palace directory / 宫殿目录路径",
+    )
+
     # status
     sub.add_parser("status", help="Show what's been filed / 显示已归档的内容")
 
@@ -604,6 +649,7 @@ def main():
         "split": cmd_split,
         "search": cmd_search,
         "mcp": cmd_mcp,
+        "web": cmd_web,
         "compress": cmd_compress,
         "wake-up": cmd_wakeup,
         "repair": cmd_repair,
