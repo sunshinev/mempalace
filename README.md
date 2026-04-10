@@ -127,20 +127,19 @@ Restart Claude Code, then type `/skills` to verify "mempalace" appears.
 
 ### With OpenCode
 
-**Step 1: Install MemPalace / 安装 MemPalace**
+**Step 1: Install MemPalace**
 
 ```bash
 # pip
 pip install mempalace
 
-# or uv (recommended / 推荐，隔离环境)
+# or uv (recommended, isolated environment)
 uv tool install mempalace
 ```
 
-**Step 2: Configure MCP / 配置 MCP**
+**Step 2: Configure MCP**
 
 Edit `~/.config/opencode/opencode.json` (create it if it doesn't exist):
-编辑 `~/.config/opencode/opencode.json`（不存在则新建）：
 
 ```json
 {
@@ -155,10 +154,9 @@ Edit `~/.config/opencode/opencode.json` (create it if it doesn't exist):
 ```
 
 > **If installed via `uv tool install`** — use the uv Python path instead:
-> 如果是通过 `uv tool install` 安装的，需要指向 uv 环境中的 python：
 >
 > ```bash
-> # Find the path / 查找路径
+> # Find the path
 > uv tool dir
 > # e.g. /Users/you/.local/share/uv/tools
 > ```
@@ -175,18 +173,15 @@ Edit `~/.config/opencode/opencode.json` (create it if it doesn't exist):
 > }
 > ```
 
-**Step 3: Verify / 验证**
+**Step 3: Verify**
 
 Restart OpenCode, then ask the AI:
-重启 OpenCode，然后对 AI 说：
 
 > *"Call mempalace_status to check the palace."*
 
 The AI should call the `mempalace_status` MCP tool and return the palace overview. If it works, you're set — the AI now has 19 memory tools available.
-AI 会调用 `mempalace_status` 返回宫殿概览。如果成功，说明配置完成——AI 现在拥有 19 个记忆工具。
 
 No `init` or `mine` commands needed — the AI writes and reads memories directly through MCP.
-不需要运行 `init` 或 `mine` 命令——AI 通过 MCP 直接读写记忆。
 
 ### With Claude, ChatGPT, Cursor, Gemini (MCP-compatible tools)
 

@@ -125,6 +125,64 @@ claude plugin install --scope user mempalace
 
 重启 Claude Code，然后输入 `/skills` 验证 "mempalace" 出现。
 
+### 配合 OpenCode
+
+**第 1 步：安装 MemPalace**
+
+```bash
+# pip
+pip install mempalace
+
+# 或者 uv（推荐，隔离环境，更快）
+uv tool install mempalace
+```
+
+**第 2 步：配置 MCP**
+
+编辑 `~/.config/opencode/opencode.json`（不存在则新建）：
+
+```json
+{
+  "mcp": {
+    "mempalace": {
+      "command": ["python3", "-m", "mempalace.mcp_server"],
+      "enabled": true,
+      "type": "local"
+    }
+  }
+}
+```
+
+> **如果是通过 `uv tool install` 安装的**，需要指向 uv 环境中的 python：
+>
+> ```bash
+> # 查找路径
+> uv tool dir
+> # 例如 /Users/you/.local/share/uv/tools
+> ```
+>
+> ```json
+> {
+>   "mcp": {
+>     "mempalace": {
+>       "command": ["/Users/you/.local/share/uv/tools/mempalace/bin/python", "-m", "mempalace.mcp_server"],
+>       "enabled": true,
+>       "type": "local"
+>     }
+>   }
+> }
+> ```
+
+**第 3 步：验证**
+
+重启 OpenCode，然后对 AI 说：
+
+> *"调用 mempalace_status 查看宫殿状态。"*
+
+AI 会调用 `mempalace_status` MCP 工具并返回宫殿概览。如果成功，说明配置完成——AI 现在拥有 19 个记忆工具。
+
+不需要运行 `init` 或 `mine` 命令——AI 通过 MCP 直接读写记忆。
+
 ### 配合 Claude、ChatGPT、Cursor、Gemini（MCP 兼容工具）
 
 ```bash
