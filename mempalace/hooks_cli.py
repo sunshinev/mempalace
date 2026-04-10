@@ -109,7 +109,7 @@ SUPPORTED_HARNESSES = {"claude-code", "codex"}
 def _parse_harness_input(data: dict, harness: str) -> dict:
     """Parse stdin JSON according to the harness type."""
     if harness not in SUPPORTED_HARNESSES:
-        print(f"Unknown harness: {harness}", file=sys.stderr)
+        print(f"Unknown harness: {harness} / 未知的harness: {harness}", file=sys.stderr)
         sys.exit(1)
     return {
         "session_id": _sanitize_session_id(str(data.get("session_id", "unknown"))),
@@ -220,7 +220,7 @@ def run_hook(hook_name: str, harness: str):
 
     handler = hooks.get(hook_name)
     if handler is None:
-        print(f"Unknown hook: {hook_name}", file=sys.stderr)
+        print(f"Unknown hook: {hook_name} / 未知的钩子: {hook_name}", file=sys.stderr)
         sys.exit(1)
 
     handler(data, harness)

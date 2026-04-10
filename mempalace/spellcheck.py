@@ -258,7 +258,7 @@ if __name__ == "__main__":
         "hybrid_v4 top-k=50 longmemeval_bench.py",
     ]
 
-    print("Spell-check test\n" + "=" * 50)
+    print("Spell-check test / 拼写检查测试\n" + "=" * 50)
     for msg in test_cases:
         result = spellcheck_user_text(msg, known_names={"riley", "sam", "mempalace"})
         changed = " ← CHANGED" if result != msg else ""

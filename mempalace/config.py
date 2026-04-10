@@ -25,24 +25,28 @@ def sanitize_name(value: str, field_name: str = "name") -> str:
     Raises ValueError if the name is invalid.
     """
     if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{field_name} must be a non-empty string")
+        raise ValueError(f"{field_name} must be a non-empty string / {field_name} 必须是非空字符串")
 
     value = value.strip()
 
     if len(value) > MAX_NAME_LENGTH:
-        raise ValueError(f"{field_name} exceeds maximum length of {MAX_NAME_LENGTH} characters")
+        raise ValueError(
+            f"{field_name} exceeds maximum length of {MAX_NAME_LENGTH} characters / {field_name} 超过最大长度 {MAX_NAME_LENGTH} 个字符"
+        )
 
     # Block path traversal
     if ".." in value or "/" in value or "\\" in value:
-        raise ValueError(f"{field_name} contains invalid path characters")
+        raise ValueError(
+            f"{field_name} contains invalid path characters / {field_name} 包含无效的路径字符"
+        )
 
     # Block null bytes
     if "\x00" in value:
-        raise ValueError(f"{field_name} contains null bytes")
+        raise ValueError(f"{field_name} contains null bytes / {field_name} 包含空字节")
 
     # Enforce safe character set
     if not _SAFE_NAME_RE.match(value):
-        raise ValueError(f"{field_name} contains invalid characters")
+        raise ValueError(f"{field_name} contains invalid characters / {field_name} 包含无效字符")
 
     return value
 
@@ -50,11 +54,13 @@ def sanitize_name(value: str, field_name: str = "name") -> str:
 def sanitize_content(value: str, max_length: int = 100_000) -> str:
     """Validate drawer/diary content length."""
     if not isinstance(value, str) or not value.strip():
-        raise ValueError("content must be a non-empty string")
+        raise ValueError("content must be a non-empty string / 内容必须是非空字符串")
     if len(value) > max_length:
-        raise ValueError(f"content exceeds maximum length of {max_length} characters")
+        raise ValueError(
+            f"content exceeds maximum length of {max_length} characters / 内容超过最大长度 {max_length} 个字符"
+        )
     if "\x00" in value:
-        raise ValueError("content contains null bytes")
+        raise ValueError("content contains null bytes / 内容包含空字节")
     return value
 
 

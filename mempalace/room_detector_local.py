@@ -205,10 +205,11 @@ def detect_rooms_from_files(project_dir: str) -> list:
 
 def print_proposed_structure(project_name: str, rooms: list, total_files: int, source: str):
     print(f"\n{'=' * 55}")
-    print("  MemPalace Init — Local setup")
+    print("  MemPalace Init — Local setup / 本地设置")
     print(f"{'=' * 55}")
     print(f"\n  WING: {project_name}")
-    print(f"  ({total_files} files found, rooms detected from {source})\n")
+    print(f"  ({total_files} files found, rooms detected from {source})")
+    print(f"  （找到 {total_files} 个文件，房间从{source}检测）\n")
     for room in rooms:
         print(f"    ROOM: {room['name']}")
         print(f"          {room['description']}")
@@ -217,37 +218,45 @@ def print_proposed_structure(project_name: str, rooms: list, total_files: int, s
 
 def get_user_approval(rooms: list) -> list:
     """Same approval flow as AI version."""
-    print("  Review the proposed rooms above.")
-    print("  Options:")
-    print("    [enter]  Accept all rooms")
-    print("    [edit]   Remove or rename rooms")
-    print("    [add]    Add a room manually")
+    print("  Review the proposed rooms above. / 请查看上方建议的房间。")
+    print("  Options: / 选项：")
+    print("    [enter]  Accept all rooms / 接受所有房间")
+    print("    [edit]   Remove or rename rooms / 移除或重命名房间")
+    print("    [add]    Add a room manually / 手动添加房间")
     print()
 
-    choice = input("  Your choice [enter/edit/add]: ").strip().lower()
+    choice = input("  Your choice / 请选择 [enter/edit/add]: ").strip().lower()
 
     if choice in ("", "y", "yes"):
         return rooms
 
     if choice == "edit":
-        print("\n  Current rooms:")
+        print("\n  Current rooms: / 当前房间：")
         for i, room in enumerate(rooms):
             print(f"    {i + 1}. {room['name']} — {room['description']}")
-        remove = input("\n  Room numbers to REMOVE (comma-separated, or enter to skip): ").strip()
+        remove = input(
+            "\n  Room numbers to REMOVE (comma-separated, or enter to skip) / 要移除的房间编号（逗号分隔，或回车跳过）: "
+        ).strip()
         if remove:
             to_remove = {int(x.strip()) - 1 for x in remove.split(",") if x.strip().isdigit()}
             rooms = [r for i, r in enumerate(rooms) if i not in to_remove]
 
-    if choice == "add" or input("\n  Add any missing rooms? [y/N]: ").strip().lower() == "y":
+    if (
+        choice == "add"
+        or input("\n  Add any missing rooms? / 添加缺失的房间？ [y/N]: ").strip().lower() == "y"
+    ):
         while True:
             new_name = (
-                input("  New room name (or enter to stop): ").strip().lower().replace(" ", "_")
+                input("  New room name (or enter to stop) / 新房间名称（或回车停止）: ")
+                .strip()
+                .lower()
+                .replace(" ", "_")
             )
             if not new_name:
                 break
-            new_desc = input(f"  Description for '{new_name}': ").strip()
+            new_desc = input(f"  Description for '{new_name}' / '{new_name}'的描述: ").strip()
             rooms.append({"name": new_name, "description": new_desc, "keywords": [new_name]})
-            print(f"  Added: {new_name}")
+            print(f"  Added / 已添加: {new_name}")
 
     return rooms
 
@@ -269,7 +278,8 @@ def save_config(project_dir: str, project_name: str, rooms: list):
         yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
     print(f"\n  Config saved: {config_path}")
-    print("\n  Next step:")
+    print(f"  配置已保存：{config_path}")
+    print("\n  Next step: / 下一步：")
     print(f"    mempalace mine {project_dir}")
     print(f"\n{'=' * 55}\n")
 
@@ -281,6 +291,7 @@ def detect_rooms_local(project_dir: str, yes: bool = False):
 
     if not project_path.exists():
         print(f"ERROR: Directory not found: {project_dir}")
+        print(f"错误：目录未找到：{project_dir}")
         sys.exit(1)
 
     # Count files

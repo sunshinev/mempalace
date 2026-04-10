@@ -264,7 +264,9 @@ def load_config(project_dir: str) -> dict:
             config_path = legacy_path
         else:
             print(f"ERROR: No mempalace.yaml found in {project_dir}")
+            print(f"错误：在 {project_dir} 中未找到 mempalace.yaml")
             print(f"Run: mempalace init {project_dir}")
+            print(f"请运行：mempalace init {project_dir}")
             sys.exit(1)
     with open(config_path) as f:
         return yaml.safe_load(f)
@@ -433,7 +435,9 @@ def process_file(
     chunks = chunk_text(content, source_file)
 
     if dry_run:
-        print(f"    [DRY RUN] {filepath.name} → room:{room} ({len(chunks)} drawers)")
+        print(
+            f"    [DRY RUN / 模拟运行] {filepath.name} → room:{room} ({len(chunks)} drawers / 抽屉)"
+        )
         return len(chunks), room
 
     drawers_added = 0
@@ -554,18 +558,18 @@ def mine(
         files = files[:limit]
 
     print(f"\n{'=' * 55}")
-    print("  MemPalace Mine")
+    print("  MemPalace Mine / 记忆宫殿挖掘")
     print(f"{'=' * 55}")
-    print(f"  Wing:    {wing}")
-    print(f"  Rooms:   {', '.join(r['name'] for r in rooms)}")
-    print(f"  Files:   {len(files)}")
-    print(f"  Palace:  {palace_path}")
+    print(f"  Wing / 翼区:    {wing}")
+    print(f"  Rooms / 房间:   {', '.join(r['name'] for r in rooms)}")
+    print(f"  Files / 文件:   {len(files)}")
+    print(f"  Palace / 宫殿:  {palace_path}")
     if dry_run:
-        print("  DRY RUN — nothing will be filed")
+        print("  DRY RUN — nothing will be filed / 模拟运行 - 不会存档任何内容")
     if not respect_gitignore:
-        print("  .gitignore: DISABLED")
+        print("  .gitignore: DISABLED / 已禁用")
     if include_ignored:
-        print(f"  Include: {', '.join(sorted(normalize_include_paths(include_ignored)))}")
+        print(f"  Include / 包含: {', '.join(sorted(normalize_include_paths(include_ignored)))}")
     print(f"{'─' * 55}\n")
 
     if not dry_run:
@@ -596,14 +600,14 @@ def mine(
                 print(f"  ✓ [{i:4}/{len(files)}] {filepath.name[:50]:50} +{drawers}")
 
     print(f"\n{'=' * 55}")
-    print("  Done.")
-    print(f"  Files processed: {len(files) - files_skipped}")
-    print(f"  Files skipped (already filed): {files_skipped}")
-    print(f"  Drawers filed: {total_drawers}")
-    print("\n  By room:")
+    print("  Done. / 完成。")
+    print(f"  Files processed / 已处理文件: {len(files) - files_skipped}")
+    print(f"  Files skipped (already filed) / 已跳过文件（已存档）: {files_skipped}")
+    print(f"  Drawers filed / 已存档抽屉: {total_drawers}")
+    print("\n  By room / 按房间:")
     for room, count in sorted(room_counts.items(), key=lambda x: x[1], reverse=True):
-        print(f"    {room:20} {count} files")
-    print('\n  Next: mempalace search "what you\'re looking for"')
+        print(f"    {room:20} {count} files / 文件")
+    print('\n  Next / 下一步: mempalace search "what you\'re looking for"')
     print(f"{'=' * 55}\n")
 
 
@@ -619,7 +623,9 @@ def status(palace_path: str):
         col = client.get_collection("mempalace_drawers")
     except Exception:
         print(f"\n  No palace found at {palace_path}")
+        print(f"  未找到宫殿：{palace_path}")
         print("  Run: mempalace init <dir> then mempalace mine <dir>")
+        print("  请运行：mempalace init <dir> 然后 mempalace mine <dir>")
         return
 
     # Count by wing and room
@@ -631,11 +637,11 @@ def status(palace_path: str):
         wing_rooms[m.get("wing", "?")][m.get("room", "?")] += 1
 
     print(f"\n{'=' * 55}")
-    print(f"  MemPalace Status — {len(metas)} drawers")
+    print(f"  MemPalace Status / 记忆宫殿状态 — {len(metas)} drawers / 抽屉")
     print(f"{'=' * 55}\n")
     for wing, rooms in sorted(wing_rooms.items()):
-        print(f"  WING: {wing}")
+        print(f"  WING / 翼区: {wing}")
         for room, count in sorted(rooms.items(), key=lambda x: x[1], reverse=True):
-            print(f"    ROOM: {room:20} {count:5} drawers")
+            print(f"    ROOM / 房间: {room:20} {count:5} drawers / 抽屉")
         print()
     print(f"{'=' * 55}\n")

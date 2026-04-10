@@ -28,7 +28,9 @@ def search(query: str, palace_path: str, wing: str = None, room: str = None, n_r
         col = client.get_collection("mempalace_drawers")
     except Exception:
         print(f"\n  No palace found at {palace_path}")
+        print(f"  未在 {palace_path} 找到记忆宫殿")
         print("  Run: mempalace init <dir> then mempalace mine <dir>")
+        print("  运行: mempalace init <目录> 然后 mempalace mine <目录>")
         raise SearchError(f"No palace found at {palace_path}")
 
     # Build where filter
@@ -53,6 +55,7 @@ def search(query: str, palace_path: str, wing: str = None, room: str = None, n_r
 
     except Exception as e:
         print(f"\n  Search error: {e}")
+        print(f"  搜索错误: {e}")
         raise SearchError(f"Search error: {e}") from e
 
     docs = results["documents"][0]
@@ -61,14 +64,15 @@ def search(query: str, palace_path: str, wing: str = None, room: str = None, n_r
 
     if not docs:
         print(f'\n  No results found for: "{query}"')
+        print(f'  未找到 "{query}" 的结果')
         return
 
     print(f"\n{'=' * 60}")
-    print(f'  Results for: "{query}"')
+    print(f'  Results for: "{query}" / 搜索结果: "{query}"')
     if wing:
-        print(f"  Wing: {wing}")
+        print(f"  Wing / 翼区: {wing}")
     if room:
-        print(f"  Room: {room}")
+        print(f"  Room / 房间: {room}")
     print(f"{'=' * 60}\n")
 
     for i, (doc, meta, dist) in enumerate(zip(docs, metas, dists), 1):
@@ -78,8 +82,8 @@ def search(query: str, palace_path: str, wing: str = None, room: str = None, n_r
         room_name = meta.get("room", "?")
 
         print(f"  [{i}] {wing_name} / {room_name}")
-        print(f"      Source: {source}")
-        print(f"      Match:  {similarity}")
+        print(f"      Source / 来源: {source}")
+        print(f"      Match / 匹配度:  {similarity}")
         print()
         # Print the verbatim text, indented
         for line in doc.strip().split("\n"):

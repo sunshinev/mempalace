@@ -706,7 +706,7 @@ def detect_entities(file_paths: list, max_files: int = 10) -> dict:
 def _print_entity_list(entities: list, label: str):
     print(f"\n  {label}:")
     if not entities:
-        print("    (none detected)")
+        print("    (none detected) / (未检测到)")
         return
     for i, e in enumerate(entities):
         confidence_bar = "●" * int(e["confidence"] * 5) + "○" * (5 - int(e["confidence"] * 5))
@@ -723,15 +723,18 @@ def confirm_entities(detected: dict, yes: bool = False) -> dict:
     Pass yes=True to auto-accept all detected entities without prompting.
     """
     print(f"\n{'=' * 58}")
-    print("  MemPalace — Entity Detection")
+    print("  MemPalace — Entity Detection / 实体检测")
     print(f"{'=' * 58}")
-    print("\n  Scanned your files. Here's what we found:\n")
+    print("\n  Scanned your files. Here's what we found:")
+    print("  已扫描您的文件，以下是检测结果：\n")
 
-    _print_entity_list(detected["people"], "PEOPLE")
-    _print_entity_list(detected["projects"], "PROJECTS")
+    _print_entity_list(detected["people"], "PEOPLE / 人物")
+    _print_entity_list(detected["projects"], "PROJECTS / 项目")
 
     if detected["uncertain"]:
-        _print_entity_list(detected["uncertain"], "UNCERTAIN (need your call)")
+        _print_entity_list(
+            detected["uncertain"], "UNCERTAIN (need your call) / 不确定（需要您判断）"
+        )
 
     confirmed_people = [e["name"] for e in detected["people"]]
     confirmed_projects = [e["name"] for e in detected["projects"]]
@@ -741,16 +744,19 @@ def confirm_entities(detected: dict, yes: bool = False) -> dict:
         print(
             f"\n  Auto-accepting {len(confirmed_people)} people, {len(confirmed_projects)} projects."
         )
+        print(f"  自动接受 {len(confirmed_people)} 个人物，{len(confirmed_projects)} 个项目。")
         return {"people": confirmed_people, "projects": confirmed_projects}
 
     print(f"\n{'─' * 58}")
-    print("  Options:")
-    print("    [enter]  Accept all")
-    print("    [edit]   Remove wrong entries or reclassify uncertain")
-    print("    [add]    Add missing people or projects")
+    print("  Options: / 选项：")
+    print("    [enter]  Accept all / 接受全部")
+    print(
+        "    [edit]   Remove wrong entries or reclassify uncertain / 移除错误条目或重新分类不确定项"
+    )
+    print("    [add]    Add missing people or projects / 添加缺失的人物或项目")
     print()
 
-    choice = input("  Your choice [enter/edit/add]: ").strip().lower()
+    choice = input("  Your choice / 请选择 [enter/edit/add]: ").strip().lower()
 
     confirmed_people = [e["name"] for e in detected["people"]]
     confirmed_projects = [e["name"] for e in detected["projects"]]
@@ -759,46 +765,60 @@ def confirm_entities(detected: dict, yes: bool = False) -> dict:
         # Handle uncertain first
         if detected["uncertain"]:
             print("\n  Uncertain entities — classify each:")
+            print("  不确定的实体 ── 请逐一分类：")
             for e in detected["uncertain"]:
-                ans = input(f"    {e['name']} — (p)erson, (r)roject, or (s)kip? ").strip().lower()
+                ans = (
+                    input(f"    {e['name']} — (p)erson/人物, (r)roject/项目, or (s)kip/跳过? ")
+                    .strip()
+                    .lower()
+                )
                 if ans == "p":
                     confirmed_people.append(e["name"])
                 elif ans == "r":
                     confirmed_projects.append(e["name"])
 
         # Remove wrong people
-        print(f"\n  Current people: {', '.join(confirmed_people) or '(none)'}")
+        print(f"\n  Current people / 当前人物: {', '.join(confirmed_people) or '(none) / (无)'}")
         remove = input(
-            "  Numbers to REMOVE from people (comma-separated, or enter to skip): "
+            "  Numbers to REMOVE from people (comma-separated, or enter to skip) / 要从人物中移除的编号（逗号分隔，或回车跳过）: "
         ).strip()
         if remove:
             to_remove = {int(x.strip()) - 1 for x in remove.split(",") if x.strip().isdigit()}
             confirmed_people = [p for i, p in enumerate(confirmed_people) if i not in to_remove]
 
         # Remove wrong projects
-        print(f"\n  Current projects: {', '.join(confirmed_projects) or '(none)'}")
+        print(
+            f"\n  Current projects / 当前项目: {', '.join(confirmed_projects) or '(none) / (无)'}"
+        )
         remove = input(
-            "  Numbers to REMOVE from projects (comma-separated, or enter to skip): "
+            "  Numbers to REMOVE from projects (comma-separated, or enter to skip) / 要从项目中移除的编号（逗号分隔，或回车跳过）: "
         ).strip()
         if remove:
             to_remove = {int(x.strip()) - 1 for x in remove.split(",") if x.strip().isdigit()}
             confirmed_projects = [p for i, p in enumerate(confirmed_projects) if i not in to_remove]
 
-    if choice == "add" or input("\n  Add any missing? [y/N]: ").strip().lower() == "y":
+    if (
+        choice == "add"
+        or input("\n  Add any missing? / 添加缺失项？ [y/N]: ").strip().lower() == "y"
+    ):
         while True:
-            name = input("  Name (or enter to stop): ").strip()
+            name = input("  Name (or enter to stop) / 名称（或回车停止）: ").strip()
             if not name:
                 break
-            kind = input(f"  Is '{name}' a (p)erson or p(r)oject? ").strip().lower()
+            kind = (
+                input(f"  Is '{name}' a (p)erson or p(r)oject? / '{name}'是(p)人物还是p(r)项目？ ")
+                .strip()
+                .lower()
+            )
             if kind == "p":
                 confirmed_people.append(name)
             elif kind == "r":
                 confirmed_projects.append(name)
 
     print(f"\n{'=' * 58}")
-    print("  Confirmed:")
-    print(f"  People:   {', '.join(confirmed_people) or '(none)'}")
-    print(f"  Projects: {', '.join(confirmed_projects) or '(none)'}")
+    print("  Confirmed: / 已确认：")
+    print(f"  People / 人物:   {', '.join(confirmed_people) or '(none) / (无)'}")
+    print(f"  Projects / 项目: {', '.join(confirmed_projects) or '(none) / (无)'}")
     print(f"{'=' * 58}\n")
 
     return {
@@ -842,12 +862,13 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2:
         print("Usage: python entity_detector.py <directory>")
+        print("用法：python entity_detector.py <目录>")
         sys.exit(1)
 
     project_dir = sys.argv[1]
-    print(f"Scanning: {project_dir}")
+    print(f"Scanning: {project_dir} / 正在扫描：{project_dir}")
     files = scan_for_detection(project_dir)
-    print(f"Reading {len(files)} files...")
+    print(f"Reading {len(files)} files... / 正在读取 {len(files)} 个文件...")
     detected = detect_entities(files)
     confirmed = confirm_entities(detected)
-    print("Confirmed entities:", confirmed)
+    print("Confirmed entities: / 已确认实体：", confirmed)

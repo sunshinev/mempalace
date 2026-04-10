@@ -30,7 +30,7 @@ def normalize(filepath: str) -> str:
     except OSError as e:
         raise IOError(f"Could not read {filepath}: {e}")
     if file_size > 500 * 1024 * 1024:  # 500 MB safety limit
-        raise IOError(f"File too large ({file_size // (1024*1024)} MB): {filepath}")
+        raise IOError(f"File too large ({file_size // (1024 * 1024)} MB): {filepath}")
     try:
         with open(filepath, "r", encoding="utf-8", errors="replace") as f:
             content = f.read()
@@ -324,11 +324,13 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2:
         print("Usage: python normalize.py <filepath>")
+        print("用法: python normalize.py <文件路径>")
         sys.exit(1)
     filepath = sys.argv[1]
     result = normalize(filepath)
     quote_count = sum(1 for line in result.split("\n") if line.strip().startswith(">"))
-    print(f"\nFile: {os.path.basename(filepath)}")
+    print(f"\nFile / 文件: {os.path.basename(filepath)}")
     print(f"Normalized: {len(result)} chars | {quote_count} user turns detected")
-    print("\n--- Preview (first 20 lines) ---")
+    print(f"已规范化: {len(result)} 字符 | 检测到 {quote_count} 个用户对话轮次")
+    print("\n--- Preview (first 20 lines) / 预览（前20行） ---")
     print("\n".join(result.split("\n")[:20]))

@@ -494,9 +494,12 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2:
         print("Usage: python general_extractor.py <file>")
+        print("用法: python general_extractor.py <文件>")
         print()
         print("Extracts decisions, preferences, milestones, problems, and")
         print("emotional moments from any text file.")
+        print("从任意文本文件中提取决策、偏好、里程碑、问题和")
+        print("情感时刻。")
         sys.exit(1)
 
     filepath = sys.argv[1]
@@ -510,6 +513,7 @@ if __name__ == "__main__":
 
     type_counts = Counter(m["memory_type"] for m in memories)
     print(f"Extracted {len(memories)} memories:")
+    print(f"提取了 {len(memories)} 条记忆:")
     for mtype in ["decision", "preference", "milestone", "problem", "emotional"]:
         count = type_counts.get(mtype, 0)
         if count:

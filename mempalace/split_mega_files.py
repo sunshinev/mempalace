@@ -184,7 +184,8 @@ def split_file(filepath, output_dir, dry_run=False):
     path = Path(filepath)
     max_size = 500 * 1024 * 1024  # 500 MB safety limit
     if path.stat().st_size > max_size:
-        print(f"  SKIP: {path.name} exceeds {max_size // (1024*1024)} MB limit")
+        print(f"  SKIP: {path.name} exceeds {max_size // (1024 * 1024)} MB limit")
+        print(f"  跳过：{path.name} 超过 {max_size // (1024 * 1024)} MB 限制")
         return []
     lines = path.read_text(errors="replace").splitlines(keepends=True)
 
@@ -221,10 +222,10 @@ def split_file(filepath, output_dir, dry_run=False):
         out_path = out_dir / name
 
         if dry_run:
-            print(f"  [{i + 1}/{len(boundaries) - 1}] {name}  ({len(chunk)} lines)")
+            print(f"  [{i + 1}/{len(boundaries) - 1}] {name}  ({len(chunk)} lines / 行)")
         else:
             out_path.write_text("".join(chunk), encoding="utf-8")
-            print(f"  ✓ {name}  ({len(chunk)} lines)")
+            print(f"  ✓ {name}  ({len(chunk)} lines / 行)")
 
         written.append(out_path)
 
@@ -233,31 +234,36 @@ def split_file(filepath, output_dir, dry_run=False):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Split concatenated transcript mega-files into per-session files"
+        description="Split concatenated transcript mega-files into per-session files\n将合并的转录大文件拆分为单次会话文件"
     )
     parser.add_argument(
         "--source",
         type=str,
         default=None,
-        help="Source directory (default: MEMPALACE_SOURCE_DIR or ~/Desktop/transcripts)",
+        help="Source directory (default: MEMPALACE_SOURCE_DIR or ~/Desktop/transcripts) / 源目录（默认：MEMPALACE_SOURCE_DIR 或 ~/Desktop/transcripts）",
     )
     parser.add_argument(
-        "--output-dir", type=str, default=None, help="Output directory (default: same as source)"
+        "--output-dir",
+        type=str,
+        default=None,
+        help="Output directory (default: same as source) / 输出目录（默认：与源目录相同）",
     )
     parser.add_argument(
         "--min-sessions",
         type=int,
         default=2,
-        help="Only split files with at least N sessions (default: 2)",
+        help="Only split files with at least N sessions (default: 2) / 仅拆分至少包含 N 个会话的文件（默认：2）",
     )
     parser.add_argument(
-        "--dry-run", action="store_true", help="Show what would happen without writing files"
+        "--dry-run",
+        action="store_true",
+        help="Show what would happen without writing files / 显示将要执行的操作但不写入文件",
     )
     parser.add_argument(
         "--file",
         type=str,
         default=None,
-        help="Split a single specific file instead of scanning dir",
+        help="Split a single specific file instead of scanning dir / 拆分单个指定文件而非扫描目录",
     )
     args = parser.parse_args()
 
@@ -273,7 +279,8 @@ def main():
     max_scan_size = 500 * 1024 * 1024  # 500 MB
     for f in files:
         if f.stat().st_size > max_scan_size:
-            print(f"  SKIP: {f.name} exceeds {max_scan_size // (1024*1024)} MB limit")
+            print(f"  SKIP: {f.name} exceeds {max_scan_size // (1024 * 1024)} MB limit")
+            print(f"  跳过：{f.name} 超过 {max_scan_size // (1024 * 1024)} MB 限制")
             continue
         lines = f.read_text(errors="replace").splitlines(keepends=True)
         boundaries = find_session_boundaries(lines)
@@ -282,34 +289,39 @@ def main():
 
     if not mega_files:
         print(f"No mega-files found in {src_dir} (min {args.min_sessions} sessions).")
+        print(f"在 {src_dir} 中未找到大文件（最少 {args.min_sessions} 个会话）。")
         return
 
     print(f"\n{'=' * 60}")
-    print(f"  Mega-file splitter — {'DRY RUN' if args.dry_run else 'SPLITTING'}")
+    print(
+        f"  Mega-file splitter / 大文件拆分器 — {'DRY RUN / 模拟运行' if args.dry_run else 'SPLITTING / 拆分中'}"
+    )
     print(f"{'=' * 60}")
-    print(f"  Source:      {src_dir}")
-    print(f"  Output:      {output_dir or 'same dir as source'}")
-    print(f"  Mega-files:  {len(mega_files)}")
+    print(f"  Source / 来源:      {src_dir}")
+    print(f"  Output / 输出:      {output_dir or 'same dir as source / 与源目录相同'}")
+    print(f"  Mega-files / 大文件:  {len(mega_files)}")
     print(f"{'─' * 60}\n")
 
     total_written = 0
     for f, n_sessions in mega_files:
-        print(f"  {f.name}  ({n_sessions} sessions, {f.stat().st_size // 1024}KB)")
+        print(f"  {f.name}  ({n_sessions} sessions / 会话, {f.stat().st_size // 1024}KB)")
         written = split_file(f, output_dir, dry_run=args.dry_run)
         total_written += len(written)
 
         if not args.dry_run and written:
             backup = f.with_suffix(".mega_backup")
             f.rename(backup)
-            print(f"  → Original renamed to {backup.name}\n")
+            print(f"  → Original renamed to {backup.name} / 原文件已重命名为 {backup.name}\n")
         else:
             print()
 
     print(f"{'─' * 60}")
     if args.dry_run:
         print(f"  DRY RUN — would create {total_written} files from {len(mega_files)} mega-files")
+        print(f"  模拟运行 - 将从 {len(mega_files)} 个大文件中创建 {total_written} 个文件")
     else:
         print(f"  Done — created {total_written} files from {len(mega_files)} mega-files")
+        print(f"  完成 - 从 {len(mega_files)} 个大文件中创建了 {total_written} 个文件")
     print()
 
 

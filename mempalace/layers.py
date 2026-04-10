@@ -455,14 +455,16 @@ if __name__ == "__main__":
     import json
 
     def usage():
-        print("layers.py — 4-Layer Memory Stack")
+        print("layers.py — 4-Layer Memory Stack / 4层记忆堆栈")
         print()
-        print("Usage:")
-        print("  python layers.py wake-up              Show L0 + L1")
-        print("  python layers.py wake-up --wing=NAME  Wake-up for a specific project")
-        print("  python layers.py recall --wing=NAME   On-demand L2 retrieval")
-        print("  python layers.py search <query>       Deep L3 search")
-        print("  python layers.py status               Show layer status")
+        print("Usage / 用法:")
+        print("  python layers.py wake-up              Show L0 + L1 / 显示 L0 + L1")
+        print(
+            "  python layers.py wake-up --wing=NAME  Wake-up for a specific project / 针对特定项目唤醒"
+        )
+        print("  python layers.py recall --wing=NAME   On-demand L2 retrieval / 按需 L2 检索")
+        print("  python layers.py search <query>       Deep L3 search / 深度 L3 搜索")
+        print("  python layers.py status               Show layer status / 显示层状态")
         sys.exit(0)
 
     if len(sys.argv) < 2:
@@ -487,7 +489,7 @@ if __name__ == "__main__":
         wing = flags.get("wing")
         text = stack.wake_up(wing=wing)
         tokens = len(text) // 4
-        print(f"Wake-up text (~{tokens} tokens):")
+        print(f"Wake-up text (~{tokens} tokens) / 唤醒文本（约{tokens}个token）:")
         print("=" * 50)
         print(text)
 
@@ -501,6 +503,7 @@ if __name__ == "__main__":
         query = " ".join(positional) if positional else ""
         if not query:
             print("Usage: python layers.py search <query>")
+            print("用法: python layers.py search <查询内容>")
             sys.exit(1)
         wing = flags.get("wing")
         room = flags.get("room")

@@ -973,17 +973,32 @@ if __name__ == "__main__":
 
     def usage():
         print("AAAK Dialect -- Compressed Symbolic Memory for Any LLM")
+        print("AAAK 方言 -- 适用于任何 LLM 的压缩符号记忆")
         print()
-        print("Usage:")
-        print("  python dialect.py <text>                         # Compress text from argument")
-        print("  python dialect.py --file <zettel.json>           # Compress zettel JSON file")
-        print("  python dialect.py --all <zettel_dir>             # Compress all zettel files")
-        print("  python dialect.py --stats <zettel.json>          # Show compression stats")
-        print("  python dialect.py --layer1 <zettel_dir>          # Generate Layer 1 wake-up file")
-        print("  python dialect.py --init                         # Create example config")
+        print("Usage / 用法:")
+        print(
+            "  python dialect.py <text>                         # Compress text from argument / 从参数压缩文本"
+        )
+        print(
+            "  python dialect.py --file <zettel.json>           # Compress zettel JSON file / 压缩 zettel JSON 文件"
+        )
+        print(
+            "  python dialect.py --all <zettel_dir>             # Compress all zettel files / 压缩所有 zettel 文件"
+        )
+        print(
+            "  python dialect.py --stats <zettel.json>          # Show compression stats / 显示压缩统计"
+        )
+        print(
+            "  python dialect.py --layer1 <zettel_dir>          # Generate Layer 1 wake-up file / 生成第1层唤醒文件"
+        )
+        print(
+            "  python dialect.py --init                         # Create example config / 创建示例配置"
+        )
         print()
-        print("Options:")
-        print("  --config <path>   Load entity mappings from JSON config")
+        print("Options / 选项:")
+        print(
+            "  --config <path>   Load entity mappings from JSON config / 从 JSON 配置加载实体映射"
+        )
         sys.exit(1)
 
     if len(sys.argv) < 2:
@@ -1015,13 +1030,14 @@ if __name__ == "__main__":
         out_path = "entities.json"
         with open(out_path, "w") as f:
             json.dump(example, f, indent=2)
-        print(f"Created example config: {out_path}")
+        print(f"Created example config: {out_path} / 已创建示例配置: {out_path}")
         print("Edit this file with your own entity mappings, then use --config entities.json")
+        print("编辑此文件填入你的实体映射，然后使用 --config entities.json")
 
     elif args[0] == "--file":
         result = dialect.compress_file(args[1])
         tokens = Dialect.count_tokens(result)
-        print(f"~{tokens} tokens")
+        print(f"~{tokens} tokens / 约{tokens}个token")
         print()
         print(result)
 
@@ -1030,8 +1046,8 @@ if __name__ == "__main__":
         output = os.path.join(zettel_dir, "COMPRESSED_MEMORY.aaak")
         result = dialect.compress_all(zettel_dir, output)
         tokens = Dialect.count_tokens(result)
-        print(f"Compressed to: {output}")
-        print(f"Total: ~{tokens} tokens")
+        print(f"Compressed to: {output} / 已压缩至: {output}")
+        print(f"Total: ~{tokens} tokens / 总计: 约{tokens}个token")
         print()
         print(result)
 
@@ -1041,12 +1057,18 @@ if __name__ == "__main__":
         json_str = json.dumps(data, indent=2)
         encoded = dialect.encode_file(data)
         stats = dialect.compression_stats(json_str, encoded)
-        print("=== COMPRESSION STATS ===")
-        print(f"JSON:     ~{stats['original_tokens_est']:,} tokens (est)")
-        print(f"AAAK:     ~{stats['summary_tokens_est']:,} tokens (est)")
-        print(f"Ratio:    {stats['size_ratio']}x (lossy — information is lost)")
+        print("=== COMPRESSION STATS / 压缩统计 ===")
+        print(
+            f"JSON:     ~{stats['original_tokens_est']:,} tokens (est) / 约{stats['original_tokens_est']:,}个token（估计）"
+        )
+        print(
+            f"AAAK:     ~{stats['summary_tokens_est']:,} tokens (est) / 约{stats['summary_tokens_est']:,}个token（估计）"
+        )
+        print(
+            f"Ratio:    {stats['size_ratio']}x (lossy — information is lost) / 比率: {stats['size_ratio']}x（有损——信息会丢失）"
+        )
         print()
-        print("=== AAAK DIALECT OUTPUT ===")
+        print("=== AAAK DIALECT OUTPUT / AAAK 方言输出 ===")
         print(encoded)
 
     elif args[0] == "--layer1":
@@ -1054,8 +1076,8 @@ if __name__ == "__main__":
         output = os.path.join(zettel_dir, "LAYER1.aaak")
         result = dialect.generate_layer1(zettel_dir, output)
         tokens = Dialect.count_tokens(result)
-        print(f"Layer 1: {output}")
-        print(f"Total: ~{tokens} tokens")
+        print(f"Layer 1: {output} / 第1层: {output}")
+        print(f"Total: ~{tokens} tokens / 总计: 约{tokens}个token")
         print()
         print(result)
 
@@ -1067,9 +1089,12 @@ if __name__ == "__main__":
         print(
             f"Original: ~{stats['original_tokens_est']} tokens est ({stats['original_chars']} chars)"
         )
+        print(f"原文: 约{stats['original_tokens_est']}个token（{stats['original_chars']}字符）")
         print(
             f"AAAK:     ~{stats['summary_tokens_est']} tokens est ({stats['summary_chars']} chars)"
         )
+        print(f"AAAK: 约{stats['summary_tokens_est']}个token（{stats['summary_chars']}字符）")
         print(f"Ratio:    {stats['size_ratio']}x (lossy summary, not lossless compression)")
+        print(f"比率: {stats['size_ratio']}x（有损摘要，非无损压缩）")
         print()
         print(compressed)

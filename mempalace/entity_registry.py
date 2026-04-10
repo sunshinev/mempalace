@@ -630,10 +630,10 @@ class EntityRegistry:
 
     def summary(self) -> str:
         lines = [
-            f"Mode: {self.mode}",
-            f"People: {len(self.people)} ({', '.join(list(self.people.keys())[:8])}{'...' if len(self.people) > 8 else ''})",
-            f"Projects: {', '.join(self.projects) or '(none)'}",
-            f"Ambiguous flags: {', '.join(self.ambiguous_flags) or '(none)'}",
-            f"Wiki cache: {len(self._data.get('wiki_cache', {}))} entries",
+            f"Mode / 模式: {self.mode}",
+            f"People / 人物: {len(self.people)} ({', '.join(list(self.people.keys())[:8])}{'...' if len(self.people) > 8 else ''})",
+            f"Projects / 项目: {', '.join(self.projects) or '(none) / (无)'}",
+            f"Ambiguous flags / 歧义标记: {', '.join(self.ambiguous_flags) or '(none) / (无)'}",
+            f"Wiki cache / 维基缓存: {len(self._data.get('wiki_cache', {}))} entries / 条目",
         ]
         return "\n".join(lines)

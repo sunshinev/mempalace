@@ -254,14 +254,14 @@ def mine_convos(
         files = files[:limit]
 
     print(f"\n{'=' * 55}")
-    print("  MemPalace Mine — Conversations")
+    print("  MemPalace Mine — Conversations / 记忆宫殿挖掘 - 对话")
     print(f"{'=' * 55}")
-    print(f"  Wing:    {wing}")
-    print(f"  Source:  {convo_path}")
-    print(f"  Files:   {len(files)}")
-    print(f"  Palace:  {palace_path}")
+    print(f"  Wing / 翼区:    {wing}")
+    print(f"  Source / 来源:  {convo_path}")
+    print(f"  Files / 文件:   {len(files)}")
+    print(f"  Palace / 宫殿:  {palace_path}")
     if dry_run:
-        print("  DRY RUN — nothing will be filed")
+        print("  DRY RUN — nothing will be filed / 模拟运行 - 不会存档任何内容")
     print(f"{'-' * 55}\n")
 
     collection = get_collection(palace_path) if not dry_run else None
@@ -311,9 +311,13 @@ def mine_convos(
 
                 type_counts = Counter(c.get("memory_type", "general") for c in chunks)
                 types_str = ", ".join(f"{t}:{n}" for t, n in type_counts.most_common())
-                print(f"    [DRY RUN] {filepath.name} → {len(chunks)} memories ({types_str})")
+                print(
+                    f"    [DRY RUN / 模拟运行] {filepath.name} → {len(chunks)} memories / 记忆 ({types_str})"
+                )
             else:
-                print(f"    [DRY RUN] {filepath.name} → room:{room} ({len(chunks)} drawers)")
+                print(
+                    f"    [DRY RUN / 模拟运行] {filepath.name} → room:{room} ({len(chunks)} drawers / 抽屉)"
+                )
             total_drawers += len(chunks)
             # Track room counts
             if extract_mode == "general":
@@ -359,21 +363,22 @@ def mine_convos(
         print(f"  ✓ [{i:4}/{len(files)}] {filepath.name[:50]:50} +{drawers_added}")
 
     print(f"\n{'=' * 55}")
-    print("  Done.")
-    print(f"  Files processed: {len(files) - files_skipped}")
-    print(f"  Files skipped (already filed): {files_skipped}")
-    print(f"  Drawers filed: {total_drawers}")
+    print("  Done. / 完成。")
+    print(f"  Files processed / 已处理文件: {len(files) - files_skipped}")
+    print(f"  Files skipped (already filed) / 已跳过文件（已存档）: {files_skipped}")
+    print(f"  Drawers filed / 已存档抽屉: {total_drawers}")
     if room_counts:
-        print("\n  By room:")
+        print("\n  By room / 按房间:")
         for room, count in sorted(room_counts.items(), key=lambda x: x[1], reverse=True):
-            print(f"    {room:20} {count} files")
-    print('\n  Next: mempalace search "what you\'re looking for"')
+            print(f"    {room:20} {count} files / 文件")
+    print('\n  Next / 下一步: mempalace search "what you\'re looking for"')
     print(f"{'=' * 55}\n")
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python convo_miner.py <convo_dir> [--palace PATH] [--limit N] [--dry-run]")
+        print("用法：python convo_miner.py <对话目录> [--palace 路径] [--limit N] [--dry-run]")
         sys.exit(1)
     from .config import MempalaceConfig
 

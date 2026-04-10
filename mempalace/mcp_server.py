@@ -39,11 +39,11 @@ logger = logging.getLogger("mempalace_mcp")
 
 
 def _parse_args():
-    parser = argparse.ArgumentParser(description="MemPalace MCP Server")
+    parser = argparse.ArgumentParser(description="MemPalace MCP Server\nMemPalace MCP 服务器")
     parser.add_argument(
         "--palace",
         metavar="PATH",
-        help="Path to the palace directory (overrides config file and env var)",
+        help="Path to the palace directory (overrides config file and env var) / 宫殿目录路径（覆盖配置文件和环境变量）",
     )
     args, unknown = parser.parse_known_args()
     if unknown:
@@ -128,8 +128,8 @@ def _get_collection(create=False):
 
 def _no_palace():
     return {
-        "error": "No palace found",
-        "hint": "Run: mempalace init <dir> && mempalace mine <dir>",
+        "error": "No palace found / 未找到宫殿",
+        "hint": "Run: mempalace init <dir> && mempalace mine <dir> / 运行: mempalace init <目录> && mempalace mine <目录>",
     }
 
 
@@ -388,7 +388,10 @@ def tool_delete_drawer(drawer_id: str):
         return _no_palace()
     existing = col.get(ids=[drawer_id])
     if not existing["ids"]:
-        return {"success": False, "error": f"Drawer not found: {drawer_id}"}
+        return {
+            "success": False,
+            "error": f"Drawer not found: {drawer_id} / 未找到抽屉: {drawer_id}",
+        }
 
     # Log the deletion with the content being removed for audit trail
     deleted_content = existing.get("documents", [""])[0] if existing.get("documents") else ""
@@ -558,7 +561,11 @@ def tool_diary_read(agent_name: str, last_n: int = 10):
         )
 
         if not results["ids"]:
-            return {"agent": agent_name, "entries": [], "message": "No diary entries yet."}
+            return {
+                "agent": agent_name,
+                "entries": [],
+                "message": "No diary entries yet. / 暂无日记条目。",
+            }
 
         # Combine and sort by timestamp
         entries = []
@@ -922,7 +929,7 @@ def handle_request(request):
 
 
 def main():
-    logger.info("MemPalace MCP Server starting...")
+    logger.info("MemPalace MCP Server starting... / MemPalace MCP 服务器启动中...")
     while True:
         try:
             line = sys.stdin.readline()
